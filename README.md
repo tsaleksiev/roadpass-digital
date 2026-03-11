@@ -38,7 +38,7 @@ rails server
 bundle exec rspec
 ```
 
-## API Endpoints
+## API endpoints
 
 ### List trips
 ```
@@ -51,3 +51,45 @@ Query parameters:
 - `sort` - `rating_asc`, `rating_desc`, or default (alphabetical by name)
 - `page` - page number (defeault: 1)
 - `per_page` - results per page (default: 10)
+
+### Get trip
+```
+GET /api/v1/trips/:id
+```
+
+### Create trip
+```
+POST /api/v1/trips
+Content-Type: application/json
+
+{
+  "trip": {
+    "name": "Zion National Park",
+    "image_url": "https://...",
+    "short_description": "A stunning canyon park.",
+    "long_description": "Zion is known for its towering sandstone cliffs.",
+    "rating": 5
+  }
+}
+```
+
+## Design decisions
+
+### Blueprinter for serialization
+Blueprinter is explicit and lightweight. It lets us define two views cleanly - a trimmed list view and a full detail view - without implicit behavior.
+
+### TripQuery object
+Rather than chaining scopes directly in the controller, a dedicated `TripQuery` class handles search, filter, sort, and pagination. This keeps the controller thin and makes the query logic easy to test and extend independently.
+
+### Database-level constraints
+All fields have `null: false` at the database level in addition to Rails model validations. Rails validations can be bypassed - the database is the last line of defense for data integrity.
+
+### Indexes on name and rating
+Added indexes on the `name` and `rating` columns since these are the columns used for searching, filtering, and sorting. This ensures queries stay performant as the dataset grows.
+
+## Room for improvement
+- **Full-text search** - replace `LIKE` with PostgreSQL `tsvector` for more powerful and performant search
+- **Rate limiting** - add `rack-attack` to throttle the create endpoint
+- **Background job** - add a Sidekiq job for nightly trip rating summaries
+- **HTTP caching** - add ETag headers on the index endpoint to reduce unnecessary DB hits
+- **Add DELETE endpoint** - soft deleting using `deleted_at` so trips can be archived rather than permanently removed.
