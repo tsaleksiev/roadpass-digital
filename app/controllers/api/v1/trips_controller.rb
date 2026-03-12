@@ -1,6 +1,8 @@
 module Api
     module V1
         class TripsController < ApplicationController
+            before_action :set_trip, only: :show
+
             def index
                 trips = TripQuery.new(query_params).call
 
@@ -13,8 +15,7 @@ module Api
             end
 
             def show
-                trip = Trip.find(params[:id])
-                render json: { data: TripBlueprint.render_as_hash(trip, view: :full) }, status: :ok
+                render json: { data: TripBlueprint.render_as_hash(@trip, view: :full) }, status: :ok
             end
 
             def create
@@ -28,6 +29,10 @@ module Api
             end
 
             private
+
+            def set_trip
+                @trip = Trip.find(params[:id])
+            end
 
             def trip_params
                 params.require(:trip).permit(:name, :image_url, :short_description, :long_description, :rating)

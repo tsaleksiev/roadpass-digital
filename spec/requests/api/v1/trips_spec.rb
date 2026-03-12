@@ -4,7 +4,7 @@ RSpec.describe "Api::V1::Trips", type: :request do
   let(:json) { JSON.parse(response.body) }
 
   describe 'GET /api/v1/trips' do
-    let!(:trips) { create_list(:trip, 15, name: "Trip") }
+    let!(:trips) { create_list(:trip, 15) }
 
     it 'returns 200 and a list of trips' do
       get '/api/v1/trips'
