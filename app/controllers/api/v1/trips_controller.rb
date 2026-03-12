@@ -4,10 +4,12 @@ module Api
             def index
                 trips = TripQuery.new(query_params).call
 
-                render json: {
-                    data: TripBlueprint.render_as_hash(trips),
-                    meta: pagination_meta(trips)
-                }, status: :ok
+                if stale?(trips, public: true)
+                    render json: {
+                        data: TripBlueprint.render_as_hash(trips),
+                        meta: pagination_meta(trips)
+                    }, status: :ok
+                end
             end
 
             def show
