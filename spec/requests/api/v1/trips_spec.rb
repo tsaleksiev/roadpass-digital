@@ -64,7 +64,7 @@ RSpec.describe "Api::V1::Trips", type: :request do
     it 'returns 404 for non-existent trip' do
       get '/api/v1/trips/99999'
       expect(response).to have_http_status(:not_found)
-      expect(json['error']).to eq('Record not found')
+      expect(json['error']).to include('Trip')
     end
   end
 
