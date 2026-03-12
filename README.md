@@ -49,7 +49,7 @@ Query parameters:
 - `search` - case-insensitive partial match on name
 - `min_rating` - filter trips with rating >= value
 - `sort` - `rating_asc`, `rating_desc`, or default (alphabetical by name)
-- `page` - page number (defeault: 1)
+- `page` - page number (default: 1)
 - `per_page` - results per page (default: 10)
 
 ### Get trip
@@ -86,6 +86,14 @@ All fields have `null: false` at the database level in addition to Rails model v
 
 ### Indexes on name and rating
 Added indexes on the `name` and `rating` columns since these are the columns used for searching, filtering, and sorting. This ensures queries stay performant as the dataset grows.
+
+## Bonus features
+
+### HTTP caching
+The index endpoint uses Rails `stale?` with ETags. If the data hasn't changed since the last request, the server returns `304 Not Modified` without querying the database.
+
+### Background job
+`TripRatingSummaryJob` generates a nightly summary of trip ratings - total trips, average rating, and top rated trip. Uses Sidekiq as the queue adapter.
 
 ## Room for improvement
 - **Full-text search** - replace `LIKE` with PostgreSQL `tsvector` for more powerful and performant search
