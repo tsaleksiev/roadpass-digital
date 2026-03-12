@@ -95,6 +95,12 @@ The index endpoint uses Rails `stale?` with ETags. If the data hasn't changed si
 ### Background job
 `TripRatingSummaryJob` generates a nightly summary of trip ratings - total trips, average rating, and top rated trip. Uses Sidekiq as the queue adapter.
 
+To run manually:
+```bash
+rails console
+TripRatingSummaryJob.perform_now
+```
+
 ## Room for improvement
 - **Full-text search** - replace `LIKE` with PostgreSQL `tsvector` for more powerful and performant search
 - **Rate limiting** - add `rack-attack` to throttle the create endpoint
