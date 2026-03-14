@@ -11,6 +11,8 @@ A RESTful JSON API built with Ruby on Rails and PostgreSQL that serves trip/dest
 - Kaminari - pagination
 - RSpec - testing
 - Docker / docker-compose - local setup
+- Sidekiq - background job processing
+- Redis - job queue and cache store
 
 ## Getting started
 
@@ -93,17 +95,17 @@ Added indexes on the `name` and `rating` columns since these are the columns use
 The index endpoint uses Rails `stale?` with ETags. If the data hasn't changed since the last request, the server returns `304 Not Modified` without querying the database.
 
 ### Background job
-`TripRatingSummaryJob` generates a nightly summary of trip ratings - total trips, average rating, and top rated trip. Uses Sidekiq as the queue adapter.
+`TripRatingSummaryJob` generates a nightly summary of trip ratings - total trips, average rating, and top rated trip. Uses Sidekiq as the queue backend.
 
-To run manually:
+Sidekiq dashboard available at `http://localhost:3000/sidekiq`.
+
+To enqueue manually:
 ```bash
 rails console
-TripRatingSummaryJob.perform_now
+TripRatingSummaryJob.perform_later
 ```
 
 ## Room for improvement
 - **Full-text search** - replace `LIKE` with PostgreSQL `tsvector` for more powerful and performant search
 - **Rate limiting** - add `rack-attack` to throttle the create endpoint
-- **Background job** - add a Sidekiq job for nightly trip rating summaries
-- **HTTP caching** - add ETag headers on the index endpoint to reduce unnecessary DB hits
 - **Add DELETE endpoint** - soft deleting using `deleted_at` so trips can be archived rather than permanently removed.
