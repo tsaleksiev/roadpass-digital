@@ -7,10 +7,14 @@ module Api
                 trips = TripQuery.new(query_params).call
 
                 if stale?(trips, public: true)
-                    render json: {
-                        data: TripBlueprint.render_as_hash(trips),
-                        meta: pagination_meta(trips)
-                    }, status: :ok
+                    cache_key = "api/v1/trips/#{query_params}"
+                    payload = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
+                        {
+                            data: TripBlueprint.render_as_hash(trips),
+                            meta: pagination_meta(trips)
+                        }
+                    end
+                    render json: payload, status: :ok
                 end
             end
 
