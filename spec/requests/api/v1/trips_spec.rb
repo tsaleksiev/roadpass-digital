@@ -44,11 +44,25 @@ RSpec.describe "Api::V1::Trips", type: :request do
     it 'sorts by rating descending' do
       get '/api/v1/trips', params: { sort: 'rating_desc' }
       ratings = json['data'].map { |t| t['rating'] }
+      expect(ratings).to eq (ratings.sort.reverse)
     end
 
     it 'paginates results' do
       get '/api/v1/trips', params: { page: 2, per_page: 10 }
       expect(json['meta']['current_page']).to eq(2)
+    end
+
+    it 'returns ETag header' do
+      get '/api/v1/trips'
+      expect(response.headers['ETag']).to be_present
+    end
+
+    it 'returns 304 when ETag matches' do
+      get '/api/v1/trips'
+      etag = response.headers['ETag']
+
+      get '/api/v1/trips', headers: { 'If-None-Match' => etag }
+      expect(response).to have_http_status(:not_modified)
     end
   end
 
