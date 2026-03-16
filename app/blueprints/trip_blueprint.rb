@@ -9,7 +9,7 @@ class TripBlueprint < Blueprinter::Base
         field :created_at do |trip|
             trip.created_at.iso8601
           end
-      
+
           field :updated_at do |trip|
             trip.updated_at.iso8601
           end
