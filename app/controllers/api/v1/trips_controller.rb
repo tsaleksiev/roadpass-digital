@@ -7,7 +7,7 @@ module Api
                 trips = TripQuery.new(query_params).call
 
                 if stale?(trips, public: true)
-                    cache_key = "api/v1/trips/#{query_params}"
+                    cache_key = "api/v1/trips/#{Trip.maximum(:updated_at).to_i}-#{Trip.count}-#{query_params.to_s}"
                     payload = Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
                         {
                             data: TripBlueprint.render_as_hash(trips),
