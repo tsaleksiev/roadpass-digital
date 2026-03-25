@@ -132,9 +132,6 @@ The index endpoint uses Rails `stale?` which automatically sets `ETag` and `Last
 - **vs fragment caching alone** - ETags work at the HTTP layer and save the server from doing any work at all on cache hits. Fragment caching still processes the request but skips the DB query.
 
 ### Redis fragment caching
-The index endpoint also uses Redis as a fragment cache store. On cache miss, the rendered JSON is stored in Redis (database 1, separate from Sidekiq's database 0) for 5 minutes. Subsequent requests are served directly from Redis
-
-### Redis fragment caching
 On ETag miss, the rendered JSON is stored in Redis for 5 minutes. Subsequent requests are served directly from Redis without hitting the database.
 
 Cache keys include a data fingerprint (maximum `updated_at` + record count combined with query params). This means
@@ -171,3 +168,4 @@ TripRatingSummaryJob.perform_later
 - **Rate limiting** - add `rack-attack` to throttle the create endpoint
 - **Add DELETE endpoint** - soft deleting using `deleted_at` so trips can be archived rather than permanently removed.
 - **Configurable cache TTL** - cache expiry is currently hardcoded to 5 minutes, could be moved to an environment variable
+- **Cache key sanitization** - The current `cache_key` includes the entire `query_params` hash. If an user passes random parameters like ?api_key=123&timestamp=999, it will create a new cache entry in Redis. An attacker could spam the API with random parameters to fill up Redis memory (Cache Exhaustion Attack). We should whitelist only the parameters that actually change the result.
